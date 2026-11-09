@@ -1,0 +1,451 @@
+CREATE TABLE cust_info (
+  cust_id int PRIMARY KEY,
+  cust_name varchar(50),
+  cust_city varchar(50),
+  cust_state varchar(50)
+);
+INSERT INTO cust_info VALUES
+(1, 'Arun', 'Chennai', 'Tamil Nadu'),
+(2, 'Priya', 'Bangalore', 'Karnataka'),
+(3, 'Karthik', 'Chennai', 'Tamil Nadu'),
+(4, 'Divya', 'Hyderabad', 'Telangana'),
+(5, 'Rahul', 'Mumbai', 'Maharashtra');
+
+
+CREATE TABLE branch (
+  branch_id int PRIMARY KEY,
+  branch_name varchar(50),
+  branch_state varchar(50)
+);
+INSERT INTO branch VALUES
+(101, 'T Nagar', 'Tamil Nadu'),
+(102, 'Anna Nagar', 'Tamil Nadu'),
+(103, 'Whitefield', 'Karnataka'),
+(104, 'Banjara Hills', 'Telangana'),
+(105, 'Andheri', 'Maharashtra');
+
+
+CREATE TABLE account_types (
+  acctype_id int PRIMARY KEY,
+  type_name varchar(50),
+  interest_rate DECIMAL(6,2)
+);
+INSERT INTO account_types VALUES
+(1, 'Savings', 4.00),
+(2, 'Current', 0.00),
+(3, 'Fixed Deposit', 7.25),
+(4, 'Salary', 3.50);
+
+
+CREATE TABLE trans_channel (
+  channel_id int PRIMARY KEY,
+  channel_name varchar(50)
+);
+INSERT INTO trans_channel VALUES
+(1, 'ATM'),
+(2, 'UPI'),
+(3, 'Net Banking'),
+(4, 'Branch Counter'),
+(5, 'Mobile Banking');
+
+
+CREATE TABLE acc_info (
+  acc_id int PRIMARY KEY,
+  branch_id int,
+  acctype_id int,
+  balance decimal(10,3),
+  opened_date date,
+  status varchar(20),
+  FOREIGN KEY(branch_id) REFERENCES branch(branch_id),
+  FOREIGN KEY(acctype_id) REFERENCES account_types(acctype_id)
+);
+INSERT INTO acc_info 
+  (acc_id,branch_id,acctype_id,balance,opened_date,status) 
+  VALUES
+(1001, 101, 1, 25000.000, '2022-01-15', 'Active'),
+(1002, 103, 2, 80000.000, '2021-06-20', 'Active'),
+(1003, 101, 1, 15000.000, '2023-03-10', 'Active'),
+(1004, 104, 3, 100000.000, '2022-11-05', 'Active'),
+(1005, 102, 4, 35000.000, '2024-01-12', 'Active'),
+(1006, 105, 1, 12000.000, '2023-08-25', 'Active'),
+(1007, 103, 1, 65000.000, '2020-05-17', 'Inactive'),
+(1008, 101, 2, 45000.000, '2024-07-01', 'Active'),
+(1009, 102, 3, 200000.000, '2021-09-09', 'InActive'),
+(1010, 104, 1, 18000.000, '2025-02-14', 'Active');
+
+
+CREATE TABLE acc_holders (
+  acc_id int ,
+  cust_id int,
+  FOREIGN KEY(acc_id) REFERENCES acc_info(acc_id),
+  FOREIGN KEY(cust_id) REFERENCES cust_info(cust_id)
+);
+INSERT INTO acc_holders
+(acc_id, cust_id)
+VALUES
+(1001, 1),
+(1002, 2),
+(1003, 3),
+(1004, 4),
+(1005, 1),
+(1006, 5),
+(1007, 3),
+(1008, 2);
+
+
+CREATE TABLE transxs (
+  trans_id int PRIMARY KEY,
+  acc_id int ,
+  channel_id int,
+  amount decimal(10,3),
+  trans_type varchar(40),
+  trans_status varchar(40),
+  trans_date date,
+  FOREIGN KEY(acc_id) REFERENCES acc_info(acc_id),
+  FOREIGN KEY(channel_id) REFERENCES trans_channel(channel_id)
+);
+INSERT INTO transxs VALUES
+(501, 1001, 2, 5000.000, 'Deposit', 'Success', '2026-01-05'),
+(502, 1001, 1, 2000.000, 'Withdrawal', 'Success', '2026-01-06'),
+(503, 1002, 3, 15000.000, 'Deposit', 'Success', '2026-01-07'),
+(504, 1003, 2, 3000.000, 'Withdrawal', 'Failed', '2026-01-08'),
+(505, 1004, 4, 10000.000, 'Deposit', 'Success', '2026-02-09'),
+(506, 1005, 5, 7000.000, 'Withdrawal', 'Success', '2026-02-10'),
+(507, 1006, 2, 4000.000, 'Deposit', 'Pending', '2026-02-11'),
+(508, 1002, 1, 5000.000, 'Withdrawal', 'Success', '2026-03-12');
+
+
+CREATE TABLE cards (
+  card_id int PRIMARY KEY,
+  acc_id int ,
+  card_type varchar(40),
+  cardIssued_date date,
+  cardExpiry_date date,
+  card_status varchar(30),
+  FOREIGN KEY(acc_id) REFERENCES acc_info(acc_id)
+);
+INSERT INTO cards VALUES
+(301, 1001, 'Debit', '2022-02-01', '2027-02-01', 'Active'),
+(302, 1002, 'Debit', '2021-07-01', '2026-07-01', 'Expired'),
+(303, 1003, 'Debit', '2023-04-01', '2028-04-01', 'Active'),
+(304, 1005, 'Credit', '2024-02-01', '2029-02-01', 'Active'),
+(305, 1006, 'Debit', '2023-09-01', '2028-09-01', 'Blocked');
+
+
+CREATE TABLE loans (
+  loan_id int PRIMARY KEY,
+  cust_id int,
+  branch_id int,
+  loan_type varchar(40),
+  loan_principal decimal(10,3),
+  loan_interest decimal(7,2),
+  loan_status varchar(30),
+  FOREIGN KEY(cust_id) REFERENCES cust_info(cust_id),
+  FOREIGN KEY(branch_id) REFERENCES branch(branch_id)
+);
+INSERT INTO loans VALUES
+(201, 1, 101, 'Personal', 100000.000, 12.50, 'Approved'),
+(202, 2, 103, 'Home', 1500000.000, 8.50, 'Approved'),
+(203, 3, 101, 'Education', 250000.000, 9.00, 'Pending'),
+(204, 5, 105, 'Vehicle', 400000.000, 10.50, 'Rejected'),
+(205, 4, 104, 'Personal', 200000.000, 11.00, 'Approved');
+
+
+CREATE TABLE loan_payments (
+  payment_id int PRIMARY KEY,
+  loan_id int,
+  payment_date date,
+  emi_amount decimal(7,2),
+  payment_status varchar(20),
+  FOREIGN KEY(loan_id) REFERENCES loans(loan_id)
+);
+INSERT INTO loan_payments VALUES
+(401, 201, '2026-01-05', 5000.00, 'Paid'),
+(402, 201, '2026-02-05', 5000.00, 'Paid'),
+(403, 202, '2026-01-10', 15000.00, 'Paid'),
+(404, 202, '2026-02-10', 15000.00, 'Pending'),
+(405, 203, '2026-02-15', 3000.00, 'Pending'),
+(406, 205, '2026-01-20', 7000.00, 'Failed');
+
+-- Display all customer details - SELECT
+SELECT *
+FROM cust_info;
+
+-- Display customer names and states - SELECT
+SELECT cust_name, cust_state
+FROM cust_info;
+
+-- Display customers from Chennai - WHERE
+SELECT *
+FROM cust_info
+WHERE cust_city = 'Chennai';
+
+-- Display accounts with balance greater than 50000 - Greater Than (>)
+SELECT acc_id, balance, status
+FROM acc_info
+WHERE balance > 50000;
+
+-- Display active accounts with balance greater than 20000 - AND
+SELECT acc_id, balance, status
+FROM acc_info
+WHERE balance > 20000
+  AND status = 'Active';
+
+-- Display accounts with balance greater than 100000 or inactive status - OR
+SELECT acc_id, balance, status
+FROM acc_info
+WHERE balance > 100000
+   OR status = 'InActive';
+
+-- Display accounts that are not active - NOT
+SELECT acc_id, balance, status
+FROM acc_info
+WHERE NOT (status = 'Active');
+
+-- Display customers from Chennai or Mumbai - IN
+SELECT cust_id, cust_name, cust_city
+FROM cust_info
+WHERE cust_city IN ('Chennai', 'Mumbai');
+
+-- Display customers who are not from Chennai or Mumbai - NOT IN
+SELECT cust_id, cust_name, cust_city
+FROM cust_info
+WHERE cust_city NOT IN ('Chennai', 'Mumbai');
+
+-- Display accounts with balances between 20000 and 80000 - BETWEEN
+SELECT acc_id, balance, status
+FROM acc_info
+WHERE balance BETWEEN 20000 AND 80000;
+
+-- Display customers whose city information is missing - IS NULL
+SELECT cust_id, cust_name, cust_city
+FROM cust_info
+WHERE cust_city IS NULL;
+
+-- Display customers whose city information is available - IS NOT NULL
+SELECT cust_id, cust_name, cust_city
+FROM cust_info
+WHERE cust_city IS NOT NULL;
+
+-- Display customers in alphabetical order - ORDER BY ASC
+SELECT cust_id, cust_name, cust_city
+FROM cust_info
+ORDER BY cust_name ASC;
+
+-- Display the top 3 accounts with the highest balances - ORDER BY and LIMIT
+SELECT acc_id, balance, status
+FROM acc_info
+ORDER BY balance DESC
+LIMIT 3;
+
+-- Count the total number of bank accounts - COUNT()
+SELECT COUNT(*)
+FROM acc_info;
+
+-- Calculate the total balance across all bank accounts - SUM()
+SELECT SUM(balance)
+FROM acc_info;
+
+-- Calculate the average balance across all bank accounts - AVG()
+SELECT AVG(balance)
+FROM acc_info;
+
+-- Find the lowest account balance - MIN()
+SELECT MIN(balance)
+FROM acc_info;
+
+-- Find the highest account balance - MAX()
+SELECT MAX(balance)
+FROM acc_info;
+
+-- Calculate total balance for each account status - GROUP BY
+SELECT status, SUM(balance) AS total_balance
+FROM acc_info
+GROUP BY status;
+
+-- Calculate total balance maintained at each branch - GROUP BY
+SELECT branch_id, SUM(balance) AS total_balance
+FROM acc_info
+GROUP BY branch_id;
+
+-- Display branches with total account balance above 100000 - HAVING
+SELECT branch_id, SUM(balance) AS total_balance
+FROM acc_info
+GROUP BY branch_id
+HAVING total_balance > 100000;
+
+-- Display the top 3 branches by total account balance - GROUP BY, ORDER BY and LIMIT
+SELECT branch_id, SUM(balance) AS total_balance
+FROM acc_info
+GROUP BY branch_id
+ORDER BY total_balance DESC
+LIMIT 3;
+
+-- Display customer names with their account IDs - INNER JOIN
+SELECT c.cust_name, a.acc_id
+FROM cust_info c
+INNER JOIN acc_holders a
+    ON c.cust_id = a.cust_id;
+
+-- Display customer names with account IDs and balances - INNER JOIN
+SELECT c.cust_name, a.acc_id, b.balance
+FROM cust_info c
+INNER JOIN acc_holders a
+    ON c.cust_id = a.cust_id
+INNER JOIN acc_info b
+    ON b.acc_id = a.acc_id;
+
+-- Display all customers with their account IDs, including customers without accounts - LEFT JOIN
+SELECT c.cust_name, a.acc_id
+FROM cust_info c
+LEFT JOIN acc_holders a
+    ON c.cust_id = a.cust_id;
+
+-- Display customers who do not have any bank account - LEFT JOIN
+SELECT c.cust_id, c.cust_name
+FROM cust_info c
+LEFT JOIN acc_holders a
+    ON c.cust_id = a.cust_id
+WHERE a.acc_id IS NULL;
+
+-- Display all branches with their loan details, including branches without loans - RIGHT JOIN
+SELECT b.branch_name, l.loan_id, l.loan_type
+FROM loans l
+RIGHT JOIN branch b
+    ON b.branch_id = l.branch_id;
+
+-- Display all transaction channels with their transactions, including unused channels - RIGHT JOIN
+SELECT a.channel_name, b.trans_id, b.amount, b.trans_status
+FROM transxs b
+RIGHT JOIN trans_channel a
+    ON a.channel_id = b.channel_id;
+
+-- Combine customer cities and branch states into one location list - UNION
+SELECT cust_city AS location
+FROM cust_info
+UNION
+SELECT branch_state
+FROM branch;
+
+-- Combine account holders and loan customers without duplicate IDs - UNION
+SELECT cust_id
+FROM acc_holders
+UNION
+SELECT cust_id
+FROM loans;
+
+-- Combine account holders and loan customers while retaining duplicates - UNION ALL
+SELECT cust_id
+FROM acc_holders
+UNION ALL
+SELECT cust_id
+FROM loans;
+
+-- Display accounts with balance greater than the overall average - Subquery
+SELECT acc_id, balance
+FROM acc_info
+WHERE balance > (
+    SELECT AVG(balance)
+    FROM acc_info
+);
+
+-- Display the customer with the highest loan principal - Subquery
+SELECT c.cust_name, l.loan_principal
+FROM cust_info c
+INNER JOIN loans l
+    ON c.cust_id = l.cust_id
+WHERE l.loan_principal = (
+    SELECT MAX(loan_principal)
+    FROM loans
+);
+
+-- Display loans with principal greater than at least one Personal loan - ANY
+SELECT loan_id, loan_type, loan_principal
+FROM loans
+WHERE loan_principal > ANY (
+    SELECT loan_principal
+    FROM loans
+    WHERE loan_type = 'Personal'
+);
+
+-- Display branches with total account balance greater than 100000 - Temporary Table
+SELECT branch_id, total_balance
+FROM (
+    SELECT branch_id, SUM(balance) AS total_balance
+    FROM acc_info
+    GROUP BY branch_id
+) AS branch_summary
+WHERE total_balance > 100000;
+
+-- Display accounts with balance greater than 50000 - CTE
+WITH high_balance_accounts AS (
+    SELECT acc_id, branch_id, balance
+    FROM acc_info
+    WHERE balance > 50000
+)
+SELECT *
+FROM high_balance_accounts;
+
+-- Display every transaction with the overall average transaction amount - Window Function OVER()
+SELECT trans_id, acc_id, amount,
+       AVG(amount) OVER() AS average_amount
+FROM transxs;
+
+-- Display every transaction with its account-wise total transaction amount - PARTITION BY
+SELECT trans_id, acc_id, amount,
+       SUM(amount) OVER(PARTITION BY acc_id) AS account_total
+FROM transxs;
+
+-- Rank loan payments by EMI amount from highest to lowest - RANK
+SELECT payment_id, loan_id, emi_amount,
+       RANK() OVER(ORDER BY emi_amount DESC) AS payment_rank
+FROM loan_payments;
+
+-- Assign unique serial numbers to loan payments by EMI amount - ROW_NUMBER
+SELECT payment_id, loan_id, emi_amount,
+       ROW_NUMBER() OVER(ORDER BY emi_amount DESC) AS serial_number
+FROM loan_payments;
+
+-- Display transaction channel names in uppercase, lowercase and combined format - String Functions
+SELECT channel_id, channel_name,
+       UPPER(channel_name) AS uppercase,
+       LOWER(channel_name) AS lowercase,
+       CONCAT(channel_name, ' ', 'channel') AS combined
+FROM trans_channel;
+
+-- Display transaction channel name length and first four characters - String Functions
+SELECT
+    channel_id,
+    channel_name,
+    LENGTH(channel_name) AS no_of_characters,
+    SUBSTRING(channel_name, 1, 4) AS first_four_characters
+FROM trans_channel;
+
+-- Find the position of letter a in transaction channel names - INSTR and LOCATE
+SELECT
+    channel_id,
+    channel_name,
+    INSTR(channel_name, 'a') AS instr_position,
+    LOCATE('a', channel_name) AS locate_position
+FROM trans_channel;
+
+-- Display cards whose card type starts with D - LIKE
+SELECT card_id, acc_id, card_type, card_status
+FROM cards
+WHERE card_type LIKE 'D%';
+
+-- Display loan payment dates in DD-MM-YYYY format - DATE_FORMAT
+SELECT
+    payment_id,
+    loan_id,
+    payment_date,
+    DATE_FORMAT(payment_date, '%d-%m-%Y') AS formatted_date
+FROM loan_payments;
+
+-- Display loan payments made within the last 30 days - INTERVAL
+SELECT payment_id, loan_id, payment_date, emi_amount
+FROM loan_payments
+WHERE payment_date >= CURDATE() - INTERVAL 30 DAY;
+
+
+
